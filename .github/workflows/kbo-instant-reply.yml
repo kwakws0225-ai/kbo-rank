@@ -1,0 +1,30 @@
+# 저장 위치: (저장소 루트)/.github/workflows/kbo-instant-reply.yml
+# Cloudflare Worker가 보내는 신호(repository_dispatch)를 받으면 즉시 실행됨
+
+name: KBO 텔레그램 즉시 응답
+
+on:
+  repository_dispatch:
+    types: [telegram_message]
+
+jobs:
+  reply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 패키지 설치
+        run: pip install requests
+
+      - name: 즉시 응답 전송
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ github.event.client_payload.chat_id }}
+          MATCHED: ${{ github.event.client_payload.matched }}
+        run: python telegram_instant_reply.py
