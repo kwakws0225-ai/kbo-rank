@@ -55,12 +55,12 @@ TEAM_LOGO_FILES = {
 # 뽑아낸 정확한 값입니다.
 # ----------------------------------------------------------------------
 LAYOUT = {
-    "table_top": 401,
+    "table_top": 394,
     "row_height": 92,
-    "row_left": 72,
-    "row_right": 1008,
+    "row_left": 60,
+    "row_right": 1020,
     "row_radius": 14,
-    "row_v_margin": 12,
+    "row_v_margin": 7,
 
     "logo_x": 180,
     "logo_size": 62,
@@ -79,16 +79,15 @@ LAYOUT = {
     },
 
     "font_size": 36,
-    "small_col_font_size": 26,   # '최근10경기'처럼 글자 수가 많은 컬럼용 축소 폰트
-    "small_columns": ["최근10경기"],
+    "condensed_columns": {"최근10경기": 0.78},  # 폰트 크기는 동일, 가로폭만 압축
     "text_color": (40, 36, 34),
     "header_color": (255, 255, 255),
 
     # 제목 아래 빈 밑줄 위에 날짜를 적을 위치 (실측 좌표) + 제목과 맞춘 스타일
     "date_pos": (372, 172),
-    "date_font_size": 36,
+    "date_font_size": 30,
     "date_color": (44, 57, 38),      # 메인 제목 글자색과 동일하게 샘플링한 값
-    "date_letter_spacing": 10,       # 자간(글자 사이 여백)
+    "date_letter_spacing": 3,        # 자간(글자 사이 여백) - 폭을 줄이기 위해 축소
 
     # 3그룹(강/중/약) 배경 색 - 채도를 높이고 불투명도를 올려 또렷하게
     "tier_colors": [
@@ -103,12 +102,10 @@ def load_fonts():
     bold = os.path.join(FONT_DIR, "Pretendard-Bold.otf")
     reg = os.path.join(FONT_DIR, "Pretendard-Regular.otf")
     fs = LAYOUT["font_size"]
-    fs_small = LAYOUT["small_col_font_size"]
     fs_date = LAYOUT["date_font_size"]
     return {
         "row": ImageFont.truetype(reg, fs),
         "row_bold": ImageFont.truetype(bold, fs),
-        "row_small": ImageFont.truetype(reg, fs_small),
         "title": ImageFont.truetype(bold, 64),
         "small": ImageFont.truetype(reg, 30),
         "date": ImageFont.truetype(bold, fs_date),
@@ -230,6 +227,23 @@ def paste_logo(img: Image.Image, team_name: str, yc: float):
     img.paste(logo, (x, y), logo)
 
 
+def draw_condensed_text(base_img, text, font, center, fill, scale_x=1.0):
+    """폰트 크기(높이)는 그대로 유지하면서 가로 폭만 줄여서 그린다."""
+    tmp = Image.new("RGBA", (500, 100), (0, 0, 0, 0))
+    td = ImageDraw.Draw(tmp)
+    bbox = td.textbbox((0, 0), text, font=font)
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
+    td.text((-bbox[0], -bbox[1]), text, font=font, fill=fill)
+    cropped = tmp.crop((0, 0, w, h))
+    if scale_x != 1.0:
+        new_w = max(1, int(w * scale_x))
+        cropped = cropped.resize((new_w, h), Image.LANCZOS)
+    x = int(center[0] - cropped.width / 2)
+    y = int(center[1] - cropped.height / 2)
+    base_img.paste(cropped, (x, y), cropped)
+
+
 def draw_text_with_spacing(draw, text, font, center, spacing, fill):
     """글자 사이 간격(자간)을 주면서 전체를 center 기준 가운데 정렬로 그린다."""
     widths = [draw.textlength(ch, font=font) for ch in text]
@@ -269,12 +283,12 @@ def render():
             if col not in df.columns:
                 continue
             val = str(row[col])
-            if col in LAYOUT["small_columns"]:
-                font = fonts["row_small"]
-            elif col in ("순위", "팀명"):
-                font = fonts["row_bold"]
-            else:
+            condensed_scale = LAYOUT["condensed_columns"].get(col)
+            if condensed_scale:
                 font = fonts["row"]
+                draw_condensed_text(img, val, font, (x, yc), LAYOUT["text_color"], condensed_scale)
+                continue
+            font = fonts["row_bold"] if col in ("순위", "팀명") else fonts["row"]
             d.text((x, yc), val, font=font, fill=LAYOUT["text_color"], anchor="mm")
 
     # 제목 아래 빈 밑줄 위에 오늘 날짜 표시 (예: 07.24) - 자간을 주고 제목 색상에 맞춤
