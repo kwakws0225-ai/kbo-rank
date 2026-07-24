@@ -12,7 +12,6 @@ https://www.koreabaseball.com/Record/TeamRank/TeamRank.aspx 의
 """
 
 import os
-import io
 import requests
 import pandas as pd
 from datetime import datetime
@@ -38,7 +37,7 @@ def crawl_kbo_team_rank(save_csv: bool = True) -> pd.DataFrame:
     resp.encoding = "utf-8"
 
     # 페이지 내 모든 <table> 을 파싱한 뒤, '순위'와 '팀명' 컬럼이 있는 표를 찾음
-    tables = pd.read_html(io.StringIO(resp.text))
+    tables = pd.read_html(resp.text)
 
     rank_df = None
     for t in tables:
