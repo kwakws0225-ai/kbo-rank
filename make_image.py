@@ -57,10 +57,10 @@ TEAM_LOGO_FILES = {
 LAYOUT = {
     "table_top": 401,
     "row_height": 92,
-    "row_left": 55,
-    "row_right": 1025,
+    "row_left": 72,
+    "row_right": 1008,
     "row_radius": 14,
-    "row_v_margin": 6,
+    "row_v_margin": 12,
 
     "logo_x": 180,
     "logo_size": 62,
@@ -84,9 +84,11 @@ LAYOUT = {
     "text_color": (40, 36, 34),
     "header_color": (255, 255, 255),
 
-    # 제목 아래 빈 밑줄 위에 날짜를 적을 위치 (실측 좌표)
+    # 제목 아래 빈 밑줄 위에 날짜를 적을 위치 (실측 좌표) + 제목과 맞춘 스타일
     "date_pos": (372, 172),
-    "date_font_size": 30,
+    "date_font_size": 36,
+    "date_color": (44, 57, 38),      # 메인 제목 글자색과 동일하게 샘플링한 값
+    "date_letter_spacing": 10,       # 자간(글자 사이 여백)
 
     # 3그룹(강/중/약) 배경 색 - 채도를 높이고 불투명도를 올려 또렷하게
     "tier_colors": [
@@ -228,6 +230,17 @@ def paste_logo(img: Image.Image, team_name: str, yc: float):
     img.paste(logo, (x, y), logo)
 
 
+def draw_text_with_spacing(draw, text, font, center, spacing, fill):
+    """글자 사이 간격(자간)을 주면서 전체를 center 기준 가운데 정렬로 그린다."""
+    widths = [draw.textlength(ch, font=font) for ch in text]
+    total_width = sum(widths) + spacing * (len(text) - 1)
+    x = center[0] - total_width / 2
+    y = center[1]
+    for ch, w in zip(text, widths):
+        draw.text((x + w / 2, y), ch, font=font, fill=fill, anchor="mm")
+        x += w + spacing
+
+
 def render():
     if not os.path.exists(CSV_PATH):
         raise FileNotFoundError(
@@ -264,13 +277,12 @@ def render():
                 font = fonts["row"]
             d.text((x, yc), val, font=font, fill=LAYOUT["text_color"], anchor="mm")
 
-    # 제목 아래 빈 밑줄 위에 오늘 날짜 표시 (예: 07.24)
+    # 제목 아래 빈 밑줄 위에 오늘 날짜 표시 (예: 07.24) - 자간을 주고 제목 색상에 맞춤
     date_str = datetime.now().strftime("%m.%d")
-    d.text(LAYOUT["date_pos"], date_str, font=fonts["date"],
-           fill=LAYOUT["text_color"], anchor="mm")
-
-    stamp = datetime.now().strftime("%Y-%m-%d %H:%M 기준")
-    d.text((W - 60, H - 50), stamp, font=fonts["small"], fill=(120, 120, 120), anchor="rm")
+    draw_text_with_spacing(
+        d, date_str, fonts["date"], LAYOUT["date_pos"],
+        LAYOUT["date_letter_spacing"], LAYOUT["date_color"],
+    )
 
     img = img.convert("RGB")
     os.makedirs(DATA_DIR, exist_ok=True)
