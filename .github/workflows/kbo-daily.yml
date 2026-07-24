@@ -10,30 +10,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 저장소 체크아웃
+      - name: "저장소 체크아웃"
         uses: actions/checkout@v4
 
-      - name: 파이썬 설치
+      - name: "파이썬 설치"
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: 패키지 설치
+      - name: "패키지 설치"
         run: pip install requests pandas lxml pillow
 
-      - name: 1) 순위 크롤링
+      - name: "1) 순위 크롤링"
         run: python kbo_team_rank_crawler.py
 
-      - name: 2) 이미지 생성
+      - name: "2) 이미지 생성"
         run: python make_image.py
 
-        - name: 3) 텔레그램 전송
+      - name: "3) 텔레그램 전송"
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python telegram_notify.py
 
-      - name: 4) 결과 커밋 & 푸시
+      - name: "4) 결과 커밋 & 푸시"
         run: |
           git config user.name "kbo-bot"
           git config user.email "kbo-bot@users.noreply.github.com"
