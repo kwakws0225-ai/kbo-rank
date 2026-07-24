@@ -19,7 +19,9 @@ jobs:
           python-version: "3.11"
 
       - name: "패키지 설치"
-        run: pip install requests pandas lxml pillow
+        run: |
+          sudo apt-get install -y libcairo2
+          pip install requests pandas lxml pillow cairosvg
 
       - name: "1) 순위 크롤링"
         run: python kbo_team_rank_crawler.py
