@@ -1,0 +1,36 @@
+name: KBO 순위 이미지 자동 생성
+
+on:
+  schedule:
+    - cron: "0,30 13,14 * * *"
+    - cron: "0 15 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 패키지 설치
+        run: pip install requests pandas lxml pillow
+
+      - name: 1) 순위 크롤링
+        run: python kbo_team_rank_crawler.py
+
+      - name: 2) 이미지 생성
+        run: python make_image.py
+
+      - name: 3) 결과 커밋 & 푸시
+        run: |
+          git config user.name "kbo-bot"
+          git config user.email "kbo-bot@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "KBO 순위 자동 업데이트 $(date +'%Y-%m-%d %H:%M')"
+          git push
