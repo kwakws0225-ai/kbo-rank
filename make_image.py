@@ -79,7 +79,6 @@ LAYOUT = {
     },
 
     "font_size": 36,
-    "condensed_columns": {"최근10경기": 0.78},  # 폰트 크기는 동일, 가로폭만 압축
     "text_color": (40, 36, 34),
     "header_color": (255, 255, 255),
 
