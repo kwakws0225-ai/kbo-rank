@@ -78,9 +78,15 @@ LAYOUT = {
         "연속": 988,
     },
 
-    "font_size": 30,
+    "font_size": 36,
+    "small_col_font_size": 26,   # '최근10경기'처럼 글자 수가 많은 컬럼용 축소 폰트
+    "small_columns": ["최근10경기"],
     "text_color": (40, 36, 34),
     "header_color": (255, 255, 255),
+
+    # 제목 아래 빈 밑줄 위에 날짜를 적을 위치 (실측 좌표)
+    "date_pos": (372, 172),
+    "date_font_size": 30,
 
     # 3그룹(강/중/약) 배경 색 - 채도를 높이고 불투명도를 올려 또렷하게
     "tier_colors": [
@@ -95,11 +101,15 @@ def load_fonts():
     bold = os.path.join(FONT_DIR, "Pretendard-Bold.otf")
     reg = os.path.join(FONT_DIR, "Pretendard-Regular.otf")
     fs = LAYOUT["font_size"]
+    fs_small = LAYOUT["small_col_font_size"]
+    fs_date = LAYOUT["date_font_size"]
     return {
         "row": ImageFont.truetype(reg, fs),
         "row_bold": ImageFont.truetype(bold, fs),
+        "row_small": ImageFont.truetype(reg, fs_small),
         "title": ImageFont.truetype(bold, 64),
         "small": ImageFont.truetype(reg, 30),
+        "date": ImageFont.truetype(bold, fs_date),
     }
 
 
@@ -246,8 +256,18 @@ def render():
             if col not in df.columns:
                 continue
             val = str(row[col])
-            font = fonts["row_bold"] if col in ("순위", "팀명") else fonts["row"]
+            if col in LAYOUT["small_columns"]:
+                font = fonts["row_small"]
+            elif col in ("순위", "팀명"):
+                font = fonts["row_bold"]
+            else:
+                font = fonts["row"]
             d.text((x, yc), val, font=font, fill=LAYOUT["text_color"], anchor="mm")
+
+    # 제목 아래 빈 밑줄 위에 오늘 날짜 표시 (예: 07.24)
+    date_str = datetime.now().strftime("%m.%d")
+    d.text(LAYOUT["date_pos"], date_str, font=fonts["date"],
+           fill=LAYOUT["text_color"], anchor="mm")
 
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M 기준")
     d.text((W - 60, H - 50), stamp, font=fonts["small"], fill=(120, 120, 120), anchor="rm")
