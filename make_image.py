@@ -282,11 +282,6 @@ def render():
             if col not in df.columns:
                 continue
             val = str(row[col])
-            condensed_scale = LAYOUT["condensed_columns"].get(col)
-            if condensed_scale:
-                font = fonts["row"]
-                draw_condensed_text(img, val, font, (x, yc), LAYOUT["text_color"], condensed_scale)
-                continue
             font = fonts["row_bold"] if col in ("순위", "팀명") else fonts["row"]
             d.text((x, yc), val, font=font, fill=LAYOUT["text_color"], anchor="mm")
 
