@@ -12,6 +12,7 @@ https://www.koreabaseball.com/Record/TeamRank/TeamRank.aspx 의
 """
 
 import os
+import io
 import requests
 import pandas as pd
 from datetime import datetime
@@ -37,7 +38,9 @@ def crawl_kbo_team_rank(save_csv: bool = True) -> pd.DataFrame:
     resp.encoding = "utf-8"
 
     # 페이지 내 모든 <table> 을 파싱한 뒤, '순위'와 '팀명' 컬럼이 있는 표를 찾음
-    tables = pd.read_html(resp.text)
+    # 주의: resp.text를 문자열로 직접 넘기면 최신 lxml에서 파일 경로로 오인해
+    # "OSError: Error reading file '<html>...'" 에러가 나는 경우가 있어 StringIO로 감싼다.
+    tables = pd.read_html(io.StringIO(resp.text))
 
     rank_df = None
     for t in tables:
@@ -58,20 +61,4 @@ def crawl_kbo_team_rank(save_csv: bool = True) -> pd.DataFrame:
 
         # 1) 실행할 때마다 기록이 남는 타임스탬프 파일 (하루 여러 번 실행해도 안 겹침)
         stamped_name = os.path.join(
-            OUTPUT_DIR, f"kbo_team_rank_{now.strftime('%Y%m%d_%H%M')}.csv"
-        )
-        rank_df.to_csv(stamped_name, index=False, encoding="utf-8-sig")
-
-        # 2) 항상 최신 상태만 덮어쓰는 파일 (매번 이 파일만 확인하면 됨)
-        latest_name = os.path.join(OUTPUT_DIR, "kbo_team_rank_latest.csv")
-        rank_df.to_csv(latest_name, index=False, encoding="utf-8-sig")
-
-        print(f"저장 완료: {stamped_name}")
-        print(f"최신본 갱신: {latest_name}")
-
-    return rank_df
-
-
-if __name__ == "__main__":
-    df = crawl_kbo_team_rank()
-    print(df.to_string(index=False))
+            OUTPUT_DIR, f"kbo_team_rank_{now.strftime('%Y%m%d_%H
