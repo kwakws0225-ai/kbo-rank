@@ -54,12 +54,18 @@ def send_photo(token, chat_id):
     with open(IMAGE_PATH, "rb") as f:
         files = {"photo": f}
         data = {"chat_id": chat_id, "caption": "요청하신 최신 KBO 팀 순위입니다."}
-        requests.post(url, data=data, files=files, timeout=20)
+        resp = requests.post(url, data=data, files=files, timeout=20)
+    if resp.status_code == 200:
+        print("이미지 전송 성공 -> chat_id " + str(chat_id))
+    else:
+        print("이미지 전송 실패 (" + str(resp.status_code) + "): " + resp.text)
 
 
 def send_text(token, chat_id, text):
     url = "https://api.telegram.org/bot" + token + "/sendMessage"
-    requests.post(url, data={"chat_id": chat_id, "text": text}, timeout=15)
+    resp = requests.post(url, data={"chat_id": chat_id, "text": text}, timeout=15)
+    if resp.status_code != 200:
+        print("텍스트 전송 실패 (" + str(resp.status_code) + "): " + resp.text)
 
 
 def main():
@@ -87,7 +93,6 @@ def main():
         if any(w.lower() in text.lower() for w in TRIGGER_WORDS):
             if os.path.exists(IMAGE_PATH):
                 send_photo(token, chat_id)
-                print("이미지 전송 -> chat_id " + str(chat_id))
             else:
                 send_text(token, chat_id, "아직 생성된 순위 이미지가 없습니다.")
         else:
