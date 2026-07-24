@@ -12,6 +12,7 @@ https://www.koreabaseball.com/Record/TeamRank/TeamRank.aspx 의
 """
 
 import os
+import io
 import requests
 import pandas as pd
 from datetime import datetime
