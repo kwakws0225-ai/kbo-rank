@@ -52,7 +52,7 @@ def crawl_kbo_team_rank(save_csv: bool = True) -> pd.DataFrame:
     if save_csv:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         now = datetime.now()
-        stamp = now.strftime("%Y%m%d_%H%M")
+        stamp = now.strftime("%Y%m%d")
 
         # 1) 실행할 때마다 기록이 남는 타임스탬프 파일 (하루 여러 번 실행해도 안 겹침)
         stamped_name = os.path.join(OUTPUT_DIR, "kbo_team_rank_" + stamp + ".csv")
