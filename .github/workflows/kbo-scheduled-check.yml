@@ -1,0 +1,56 @@
+# 저장 위치: (저장소 루트)/.github/workflows/kbo-scheduled-check.yml
+# Cloudflare Cron Trigger가 보내는 신호를 받아 순위 변경을 감시합니다.
+# 크롤링 -> 이미지 생성 -> 데이터가 실제로 바뀐 경우에만 텔레그램 전송
+
+name: KBO 순위 변경 감시
+
+on:
+  repository_dispatch:
+    types: [scheduled_check]
+
+# 여러 신호가 겹쳐 들어와도 한 번에 하나만 실행 (git push 충돌 방지)
+concurrency:
+  group: kbo-scheduled-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 패키지 설치
+        run: |
+          sudo apt-get install -y libcairo2
+          pip install requests pandas lxml pillow cairosvg
+
+      - name: 1) 순위 크롤링
+        run: python kbo_team_rank_crawler.py
+
+      - name: 2) 이미지 생성
+        run: python make_image.py
+
+      - name: 3) 데이터 변경 시에만 텔레그램 전송
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python telegram_notify.py
+
+      - name: 4) 결과 커밋 & 푸시
+        run: |
+          git config user.name "kbo-bot"
+          git config user.email "kbo-bot@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "변경 사항 없음 - 커밋 생략"
+          else
+            git commit -m "KBO 순위 갱신 $(date +'%Y-%m-%d %H:%M')"
+            git pull --rebase --autostash origin main || true
+            git push
+          fi
