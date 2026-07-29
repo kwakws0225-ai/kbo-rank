@@ -4,9 +4,6 @@
 name: KBO 순위 이미지 자동 생성
 
 on:
-  schedule:
-    - cron: "0,20,40 13,14 * * *"   # KST 22:00,22:20,...,23:40
-    - cron: "0,10 15 * * *"         # KST 00:00, 00:10
   workflow_dispatch: {}
 
 jobs:
