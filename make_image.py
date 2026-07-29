@@ -55,8 +55,8 @@ TEAM_LOGO_FILES = {
 # 뽑아낸 정확한 값입니다.
 # ----------------------------------------------------------------------
 LAYOUT = {
-    "table_top": 394,
-    "row_height": 92,
+    "table_top": 338,
+    "row_height": 103,
     "row_left": 60,
     "row_right": 1020,
     "row_radius": 14,
@@ -84,9 +84,9 @@ LAYOUT = {
 
     # 제목 아래 빈 밑줄 위에 날짜를 적을 위치 (실측 좌표) + 제목과 맞춘 스타일
     "date_pos": (372, 172),
-    "date_font_size": 30,
+    "date_font_size": 46,
     "date_color": (44, 57, 38),      # 메인 제목 글자색과 동일하게 샘플링한 값
-    "date_letter_spacing": 3,        # 자간(글자 사이 여백) - 폭을 줄이기 위해 축소
+    "date_letter_spacing": 0,         # 자연스러운 자간 (인위적 간격 제거, 폰트 크기로 폭 조절)
 
     # 3그룹(강/중/약) 배경 색 - 채도를 높이고 불투명도를 올려 또렷하게
     "tier_colors": [
