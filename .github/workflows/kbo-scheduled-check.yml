@@ -1,6 +1,7 @@
 # 저장 위치: (저장소 루트)/.github/workflows/kbo-scheduled-check.yml
 # Cloudflare Cron Trigger가 보내는 신호를 받아 순위 변경을 감시합니다.
-# 크롤링 -> 이미지 생성 -> 데이터가 실제로 바뀐 경우에만 텔레그램 전송
+# git에 이미 커밋된 이전 CSV와 직접 비교하여, 실제로 바뀐 경우에만
+# 이미지 생성 + 텔레그램 전송 + 커밋을 수행합니다.
 
 name: KBO 순위 변경 감시
 
@@ -33,24 +34,34 @@ jobs:
       - name: 1) 순위 크롤링
         run: python kbo_team_rank_crawler.py
 
-      - name: 2) 이미지 생성
+      - name: 2) 이전 커밋과 직접 비교해 변경 여부 확인
+        id: check_change
+        run: |
+          if git diff --quiet -- data/kbo_team_rank_latest.csv; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "변경 없음 - 이후 단계 생략"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "변경 감지됨 - 이미지 생성 및 전송 진행"
+          fi
+
+      - name: 3) 이미지 생성 (변경 시에만)
+        if: steps.check_change.outputs.changed == 'true'
         run: python make_image.py
 
-      - name: 3) 데이터 변경 시에만 텔레그램 전송
+      - name: 4) 텔레그램 전송 (변경 시에만)
+        if: steps.check_change.outputs.changed == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python telegram_notify.py
+        run: python telegram_notify.py --force
 
-      - name: 4) 결과 커밋 & 푸시
+      - name: 5) 결과 커밋 & 푸시 (변경 시에만)
+        if: steps.check_change.outputs.changed == 'true'
         run: |
           git config user.name "kbo-bot"
           git config user.email "kbo-bot@users.noreply.github.com"
           git add data/
-          if git diff --cached --quiet; then
-            echo "변경 사항 없음 - 커밋 생략"
-          else
-            git commit -m "KBO 순위 갱신 $(date +'%Y-%m-%d %H:%M')"
-            git pull --rebase --autostash origin main || true
-            git push
-          fi
+          git commit -m "KBO 순위 갱신 $(date +'%Y-%m-%d %H:%M')"
+          git pull --rebase --autostash origin main || true
+          git push
