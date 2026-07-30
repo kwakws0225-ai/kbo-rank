@@ -59,8 +59,8 @@ LAYOUT = {
     "row_height": 90,
     "row_left": 55,
     "row_right": 1025,
-    "row_radius": 10,
-    "row_v_margin": 4,
+    "row_radius": 14,
+    "row_v_margin": 10,
 
     "logo_x": 180,
     "logo_size": 70,
