@@ -57,10 +57,10 @@ TEAM_LOGO_FILES = {
 LAYOUT = {
     "table_top": 338,
     "row_height": 103,
-    "row_left": 60,
-    "row_right": 1020,
+    "row_left": 55,
+    "row_right": 1025,
     "row_radius": 14,
-    "row_v_margin": 7,
+    "row_v_margin": 12,
 
     "logo_x": 180,
     "logo_size": 62,
@@ -83,7 +83,7 @@ LAYOUT = {
     "header_color": (255, 255, 255),
 
     # 제목 아래 빈 밑줄 위에 날짜를 적을 위치 (실측 좌표) + 제목과 맞춘 스타일
-    "date_pos": (372, 172),
+    "date_pos": (357, 172),
     "date_font_size": 46,
     "date_color": (44, 57, 38),      # 메인 제목 글자색과 동일하게 샘플링한 값
     "date_letter_spacing": 0,         # 자연스러운 자간 (인위적 간격 제거, 폰트 크기로 폭 조절)
@@ -282,7 +282,7 @@ def render():
             if col not in df.columns:
                 continue
             val = str(row[col])
-            font = fonts["row_bold"] if col in ("순위", "팀명") else fonts["row"]
+            font = fonts["row_bold"] if col in ("순위", "팀명", "게임차") else fonts["row"]
             d.text((x, yc), val, font=font, fill=LAYOUT["text_color"], anchor="mm")
 
     # 제목 아래 빈 밑줄 위에 오늘 날짜 표시 (예: 07.24) - 자간을 주고 제목 색상에 맞춤
