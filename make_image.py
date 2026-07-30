@@ -57,9 +57,9 @@ TEAM_LOGO_FILES = {
 LAYOUT = {
     "table_top": 360,
     "row_height": 100,
-    "row_left": 55,
-    "row_right": 1025,
-    "row_radius": 18,
+    "row_left": 50,
+    "row_right": 1030,
+    "row_radius": 20,
     "row_v_margin": 6,
 
     "logo_x": 180,
