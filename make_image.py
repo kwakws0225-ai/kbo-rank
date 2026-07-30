@@ -60,7 +60,7 @@ LAYOUT = {
     "row_left": 55,
     "row_right": 1025,
     "row_radius": 18,
-    "row_v_margin": 14,
+    "row_v_margin": 2,
 
     "logo_x": 180,
     "logo_size": 70,
