@@ -55,12 +55,12 @@ TEAM_LOGO_FILES = {
 # 뽑아낸 정확한 값입니다.
 # ----------------------------------------------------------------------
 LAYOUT = {
-    "table_top": 370,
-    "row_height": 110,
+    "table_top": 360,
+    "row_height": 80,
     "row_left": 55,
     "row_right": 1025,
     "row_radius": 18,
-    "row_v_margin": 2,
+    "row_v_margin": 6,
 
     "logo_x": 180,
     "logo_size": 70,
